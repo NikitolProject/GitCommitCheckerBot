@@ -9,12 +9,18 @@ class GitHubCommitCheckerBot:
 
     api = API(os.environ["BOT_TOKEN"])
     git = Github(os.environ["GITHUB_TOKEN"])
+    repo = git.get_repo(os.environ["REPOSITORY_NAME"])
     last_commit = None
 
     async def run(self: "GitHubCommitCheckerBot") -> None:
+        """
+        Starts checking new commits in the repository. If they are available, it will be
+        a new message sent on behalf of the group/user whose token was
+        inserted in the configuration file (.env) in conversation/private messages,
+        the peer_id of which is specified in the configuration file (.env).
+        """
         while True:
-            repo = self.git.get_repo(os.environ["REPOSITORY_NAME"])
-            commits = repo.get_commits().reversed
+            commits = self.repo.get_commits().reversed
             if self.last_commit is None or self.last_commit != commits[0]:
                 self.last_commit = commits[0]
                 await self.api.request(
